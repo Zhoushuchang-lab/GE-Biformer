@@ -35,7 +35,7 @@ This model aims to predict complex crop traits by integrating genotype data (SNP
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Gene-Environment MoE Model                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  Genotype Input │    Environment Input                          │
+│  Genotype Input     Environment Input                          │
 │       │                 │                                     │
 │       ▼                 ▼                                     │
 │  SNP Attention   Environment Attention                        │
