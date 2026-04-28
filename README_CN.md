@@ -1,4 +1,4 @@
-# Gene-Environment Interaction Attention Model with Mixture of Experts
+# Bidirectional Cross Attention Integrates Genomic and Enviromic Data for Improved Genotype by Environment Prediction in Maize
 
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![PyTorch Version](https://img.shields.io/badge/pytorch-2.0+-orange.svg)](https://pytorch.org/)
