@@ -35,13 +35,13 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Gene-Environment MoE Model                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  Genotype Input │    Environment Input                          │
-│       │         │         │                                     │
-│       ▼         │         ▼                                     │
-│  SNP Attention  │  Environment Attention                        │
-│  (Ind+Coop)     │  (Ind+Coop)                                   │
-│       │         │         │                                     │
-│       └────┬────┘         │                                     │
+│  Genotype Input     Environment Input                           │
+│           │                 │                                   │
+│           ▼                 ▼                                   │
+│  SNP Attention   Environment Attention                          │
+│  (Ind+Coop)       (Ind+Coop)                                    │
+│            │              │                                     │
+│            │              │                                     │
 │            │              │                                     │
 │            ▼              ▼                                     │
 │        Token-wise Cross-Modal Fusion                            │
