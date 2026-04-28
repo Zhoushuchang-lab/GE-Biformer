@@ -35,25 +35,25 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Gene-Environment MoE Model                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  Genotype Input │    Environment Input                         │
-│       │         │         │                                    │
-│       ▼         │         ▼                                    │
-│  SNP Attention  │  Environment Attention                       │
-│  (独立+协同)    │  (独立+协同)                                 │
-│       │         │         │                                    │
-│       └────┬────┘         │                                    │
+│  Genotype Input │    Environment Input                          │
+│       │         │         │                                     │
+│       ▼         │         ▼                                     │
+│  SNP Attention  │  Environment Attention                        │
+│  (独立+协同)     │  (独立+协同)                                  │
+│       │         │          │                                    │
+│       └────┬────┘          │                                    │
 │            │               │                                    │
 │            ▼               ▼                                    │
-│        Token-wise Cross-Modal Fusion                          │
-│            │                                                  │
-│            ▼                                                  │
-│        Mixture of Experts (Top-K)                             │
-│            │                                                  │
-│            ▼                                                  │
-│        Feature Network                                        │
-│            │                                                  │
-│            ▼                                                  │
-│        Phenotype Prediction                                    │
+│        Token-wise Cross-Modal Fusion                            │
+│            │                                                    │
+│            ▼                                                    │
+│        Mixture of Experts (Top-K)                               │
+│            │                                                    │
+│            ▼                                                    │
+│        Feature Network                                          │
+│            │                                                    │
+│            ▼                                                    │
+│        Phenotype Prediction                                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
