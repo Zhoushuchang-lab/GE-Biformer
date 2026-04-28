@@ -1,135 +1,136 @@
 # Gene-Environment Interaction Attention Model with Mixture of Experts
 
-[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
-[![PyTorch Version](https://img.shields.io/badge/pytorch-2.4.0-orange.svg)](https://pytorch.org/)
+[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+[![PyTorch Version](https://img.shields.io/badge/pytorch-2.0+-orange.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-这是一个基于注意力机制和Mixture of Experts (MoE)的基因-环境交互预测模型，用于预测复杂性状的表现。
+This is a gene-environment interaction prediction model based on attention mechanisms and Mixture of Experts (MoE) for predicting complex trait performance.
 
-## 📋 目录
+## 📋 Table of Contents
 
-- [项目简介](#项目简介)
-- [模型架构](#模型架构)
-- [安装指南](#安装指南)
-- [数据准备](#数据准备)
-- [使用方法](#使用方法)
-- [超参数配置](#超参数配置)
-- [输出说明](#输出说明)
-- [模型变体](#模型变体)
-- [贡献指南](#贡献指南)
-- [许可证](#许可证)
+- [Introduction](#introduction)
+- [Model Architecture](#model-architecture)
+- [Installation](#installation)
+- [Data Preparation](#data-preparation)
+- [Usage](#usage)
+- [Hyperparameter Configuration](#hyperparameter-configuration)
+- [Output Description](#output-description)
+- [Model Variants](#model-variants)
+- [Contributing](#contributing)
+- [License](#license)
 
-## 🌟 项目简介
+## 🌟 Introduction
 
-本模型旨在通过整合基因型数据（SNP）和环境协变量，预测作物的复杂性状。模型采用以下核心技术：
+This model aims to predict complex crop traits by integrating genotype data (SNP) and environmental covariates. The model adopts the following core technologies:
 
-- **注意力机制**：捕捉SNP之间和环境变量之间的复杂交互
-- **MoE架构**：动态选择专家网络处理不同的基因-环境组合
-- **跨模态融合**：有效整合基因型和环境信息
+- **Attention Mechanism**: Captures complex interactions between SNPs and environmental variables
+- **MoE Architecture**: Dynamically selects expert networks to handle different gene-environment combinations
+- **Cross-Modal Fusion**: Effectively integrates genotype and environment information
 
-## 🏗️ 模型架构
+## 🏗️ Model Architecture
 
-### 整体架构
+### Overall Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Gene-Environment MoE Model                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  SNP Input    │    Environment Input                           │
-│     │         │         │                                      │
-│     ▼         │         ▼                                      │
-│  SNP Attention│  Environment Attention                         │
-│  (独立+协同)  │  (独立+协同)                                   │
-│     │         │         │                                      │
-│     └────┬────┘         │                                      │
-│          │               │                                      │
-│          ▼               ▼                                      │
-│      Token-wise Cross-Modal Fusion                            │
-│          │                                                    │
-│          ▼                                                    │
-│      Mixture of Experts (Top-K)                               │
-│          │                                                    │
-│          ▼                                                    │
-│      Feature Network                                          │
-│          │                                                    │
-│          ▼                                                    │
-│      Phenotype Prediction                                      │
+│  Genotype Input │    Environment Input                         │
+│       │         │         │                                    │
+│       ▼         │         ▼                                    │
+│  SNP Attention  │  Environment Attention                       │
+│  (Ind+Coop)     │  (Ind+Coop)                                  │
+│       │         │         │                                    │
+│       └────┬────┘         │                                    │
+│            │               │                                    │
+│            ▼               ▼                                    │
+│        Token-wise Cross-Modal Fusion                          │
+│            │                                                  │
+│            ▼                                                  │
+│        Mixture of Experts (Top-K)                             │
+│            │                                                  │
+│            ▼                                                  │
+│        Feature Network                                        │
+│            │                                                  │
+│            ▼                                                  │
+│        Phenotype Prediction                                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 核心组件
+### Core Components
 
-| 组件 | 功能 |
-|------|------|
-| **SNP Attention Module** | 处理基因型数据，学习SNP间的独立效应和协同效应 |
-| **Environment Attention Module** | 处理环境数据，学习环境变量间的独立效应和协同效应 |
-| **Token-wise Cross-Modal Fusion** | 将SNP和环境特征进行跨模态注意力融合 |
-| **MoE Layer** | 使用Top-K门控机制动态选择专家网络 |
-| **Feature Network** | 特征转换和整合 |
-| **Predictor** | 最终性状预测层 |
+| Component | Function |
+|-----------|----------|
+| **SNP Attention Module** | Processes genotype data, learns independent and cooperative effects between SNPs |
+| **Environment Attention Module** | Processes environment data, learns independent and cooperative effects between environmental variables |
+| **Token-wise Cross-Modal Fusion** | Performs cross-modal attention fusion on SNP and environment features |
+| **MoE Layer** | Dynamically selects expert networks using Top-K gating mechanism |
+| **Feature Network** | Feature transformation and integration |
+| **Predictor** | Final trait prediction layer |
 
-## 🛠️ 安装指南
+## 🛠️ Installation
 
-### 环境要求
+### Requirements
 
 - Python >= 3.10
 - PyTorch >= 2.0
-- CUDA >= 11.8 (推荐使用GPU训练)
+- CUDA >= 11.8 (GPU training recommended)
 
-### 使用conda安装
+### Using Conda
 
 ```bash
-# 克隆仓库
+# Clone repository
 git clone <repository-url>
 cd <repository-name>
 
-# 创建并激活环境
+# Create and activate environment
 conda env create -f code/environment.yml
-conda activate TraeAI-4
+conda activate gene-env-moe
 
-# 进入代码目录
+# Enter code directory
 cd code
 ```
 
-### 使用pip安装
+### Using pip
 
 ```bash
-# 创建虚拟环境
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
+# Or
 venv\Scripts\activate    # Windows
 
-# 安装依赖
+# Install dependencies
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install pandas numpy scikit-learn matplotlib
+pip install pandas numpy scikit-learn matplotlib tqdm
 ```
 
-## 📊 数据准备
+## 📊 Data Preparation
 
-### 项目目录结构
+### Project Structure
 
 ```
 project/
-├── code/                    # 源代码目录
-│   ├── config.json          # 配置文件
-│   ├── config.py            # 配置加载
-│   ├── dataset.py           # 数据处理
-│   ├── model.py             # 模型定义
-│   ├── train.py             # 训练脚本
-│   ├── utils.py             # 工具函数
-│   └── environment.yml      # 环境配置
-├── data/                    # 数据目录（需自行创建）
-│   ├── 012_matrix.tsv       # SNP基因型数据
-│   ├── Phenotypes.csv       # 表型数据
-│   └── Environment_data.csv # 环境协变量数据
-├── gene_env_moe_model/      # 模型保存目录（自动创建）
-└── moe_analysis/            # MoE分析结果目录（自动创建）
+├── code/                    # Source code directory
+│   ├── config.json          # Configuration file
+│   ├── config.py            # Configuration loader
+│   ├── dataset.py           # Data processing
+│   ├── model.py             # Model definitions
+│   ├── train.py             # Training script
+│   ├── utils.py             # Utility functions
+│   └── environment.yml      # Environment configuration
+├── data/                    # Data directory (create manually)
+│   ├── genotype.tsv         # Genotype data (0-1-2 encoding)
+│   ├── Phenotypes.csv       # Phenotype data (train + validation)
+│   ├── Environment_data.csv # Environmental covariate data
+│   └── test.csv             # Test set data (optional)
+├── gene_env_moe_model/      # Model save directory (auto-created)
+└── moe_analysis/            # MoE analysis results directory (auto-created)
 ```
 
-### 数据格式要求
+### Data Format Requirements
 
-#### 1. SNP数据 (`012_matrix.tsv`)
+#### 1. Genotype Data (`genotype.tsv`)
 
 | SNP_ID | Hybrid_1 | Hybrid_2 | ... | Hybrid_N |
 |--------|----------|----------|-----|----------|
@@ -137,12 +138,12 @@ project/
 | SNP_002 | 1 | 2 | ... | 0 |
 | ... | ... | ... | ... | ... |
 
-- 第一列为SNP标识符
-- 其他列为杂交种的基因型
-- 基因型编码：0（纯合参考）、1（杂合）、2（纯合替代）
-- 缺失值用 `-1` 表示
+- First column contains SNP identifiers
+- Other columns contain genotype data for each hybrid
+- Genotype encoding: 0 (homozygous reference), 1 (heterozygous), 2 (homozygous alternative)
+- Missing values should be represented as `-1`
 
-#### 2. 表型数据 (`Phenotypes.csv`)
+#### 2. Phenotype Data (`Phenotypes.csv`)
 
 | Environment | Hybrid | Yield | Grain Moisture | Pollen_DAP_days | ... |
 |-------------|--------|-------|----------------|-----------------|-----|
@@ -150,180 +151,207 @@ project/
 | ENV_001 | Hybrid_2 | 12.3 | 19.1 | 67 | ... |
 | ... | ... | ... | ... | ... | ... |
 
-#### 3. 环境数据 (`Environment_data.csv`)
+#### 3. Environment Data (`Environment_data.csv`)
 
 | Variable | ENV_001 | ENV_002 | ... | ENV_M |
 |----------|---------|---------|-----|-------|
-| Temperature | 25.3 | 26.1 | ... | 24.8 |
-| Humidity | 65 | 72 | ... | 68 |
-| Rainfall | 10.5 | 8.2 | ... | 12.3 |
+| Var_1 | 25.3 | 26.1 | ... | 24.8 |
+| Var_2| 65 | 72 | ... | 68 |
+| Var_3| 10.5 | 8.2 | ... | 12.3 |
 | ... | ... | ... | ... | ... |
 
-## 🚀 使用方法
+#### 4. Test Set Data (`test.csv`) - Optional
 
-### 训练模型
+The test set format is the same as Phenotypes.csv, used for independent model evaluation.
+
+| Environment | Hybrid | Yield | Grain Moisture | ... |
+|-------------|--------|-------|----------------|-----|
+| ENV_TEST_01 | Hybrid_101 | 11.2 | 17.8 | ... |
+| ENV_TEST_01 | Hybrid_102 | 13.1 | 18.5 | ... |
+
+### Data Splitting
+
+- **Training Set**: 80% of data for model training
+- **Validation Set**: 10% of data for hyperparameter tuning and early stopping
+- **Test Set**: 10% of data (or external test set) for final model evaluation
+
+If a `test.csv` file is provided, the model will use the external test set for evaluation. Otherwise, the test set will be split from the main dataset.
+
+## 🚀 Usage
+
+### Training the Model
 
 ```bash
 cd code
 
-# 训练完整模型（trait1-6）
+# Train full model (traits 1-6)
 python train.py --traits 1-6 --model full
 
-# 训练特定性状
+# Train specific traits
 python train.py --traits 1,3,5 --model full
 
-# 训练无MoE版本进行对比
+# Train without MoE for comparison
 python train.py --traits 1-6 --model no_moe
 ```
 
-### 参数说明
+### Parameter Description
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--traits` | str | `3,4,5,6` | 要训练的性状编号，用逗号分隔或范围表示 |
-| `--model` | str | `full` | 模型类型：`full`, `no_moe`, `no_effect_sep`, `no_token_fusion` |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--traits` | str | `3,4,5,6` | Trait numbers to train, separated by commas or ranges |
+| `--model` | str | `full` | Model type: `full`, `no_moe`, `no_effect_sep`, `no_token_fusion` |
 
-### 训练示例
+### Training Examples
 
 ```bash
-# 示例1：训练所有性状
+# Example 1: Train all traits
 python train.py --traits 1-7 --model full
 
-# 示例2：只训练产量和株高
+# Example 2: Train only Yield and Plant Height
 python train.py --traits 1,5 --model full
 
-# 示例3：训练消融实验模型
+# Example 3: Train ablation model
 python train.py --traits 1-6 --model no_effect_sep
 ```
 
-### 训练输出
+### Training Output
 
-训练过程中会显示：
+During training, the following will be displayed:
 
 ```
-选择的性状: ['trait1', 'trait2', 'trait3', 'trait4', 'trait5', 'trait6']
-模型类型: full
-使用GPU: NVIDIA GeForce RTX 4090
+Selected traits: ['trait1', 'trait2', 'trait3', 'trait4', 'trait5', 'trait6']
+Model type: full
+Using GPU: NVIDIA GeForce RTX 4090
+Test set samples: 156
 
-========== 训练Gene-Environment Interaction Attention Model with MoE - Yield ==========
+========== Training Gene-Environment Interaction Attention Model with MoE - Yield ==========
 Epoch 1/300 | Train Loss: 5.2341 | Val Loss: 5.1923 | Train R²: 0.1234 | Val R²: 0.1185 | LR: 3.00e-04
 Epoch 2/300 | Train Loss: 4.8723 | Val Loss: 4.8210 | Train R²: 0.1876 | Val R²: 0.1821 | LR: 3.00e-04
 ...
+
+Evaluating Yield test set...
+Test R²: 0.6523, PCC: 0.8077
 ```
 
-## ⚙️ 超参数配置
+## ⚙️ Hyperparameter Configuration
 
-配置文件位于 `config.json`：
+The configuration file is located at `config.json`:
 
 ```json
 {
-    "num_experts": 8,           # MoE专家数量
-    "top_k": 2,                 # Top-K选择的专家数
-    "num_heads": 8,             # 注意力头数
-    "batch_size": 64,           # 批次大小
-    "learning_rate": 0.0003,    # 学习率
-    "epochs": 300,              # 训练轮数
-    "dropout": 0.3,             # Dropout率
-    "moe_hidden_dim": 128,      # MoE隐藏层维度
-    "fusion_attention_dim": 256,# 融合注意力维度
-    "early_patience": 30,       # 早停耐心值
-    "cuda_device": 0            # GPU设备编号
+    "num_experts": 8,           // Number of MoE experts
+    "top_k": 2,                 // Number of experts selected per sample
+    "num_heads": 8,             // Number of attention heads
+    "batch_size": 64,           // Batch size
+    "learning_rate": 0.0003,    // Learning rate
+    "epochs": 300,              // Number of training epochs
+    "dropout": 0.3,             // Dropout rate
+    "moe_hidden_dim": 128,      // MoE hidden dimension
+    "fusion_attention_dim": 256,// Fusion attention dimension
+    "early_patience": 30,       // Early stopping patience
+    "cuda_device": 0,           // GPU device ID
+    "test_size": 0.1,           // Test set ratio
+    "random_state": 42          // Random seed
 }
 ```
 
-### 关键超参数说明
+### Key Hyperparameter Description
 
-| 参数 | 说明 | 建议范围 |
-|------|------|----------|
-| `num_experts` | MoE专家数量 | 4-16 |
-| `top_k` | 每个样本选择的专家数 | 1-4 |
-| `num_heads` | 注意力头数 | 4-16 |
-| `batch_size` | 批次大小 | 32-256 |
-| `learning_rate` | 初始学习率 | 1e-4-1e-3 |
-| `epochs` | 训练轮数 | 100-500 |
+| Parameter | Description | Recommended Range |
+|-----------|-------------|-------------------|
+| `num_experts` | Number of MoE experts | 4-16 |
+| `top_k` | Number of experts selected per sample | 1-4 |
+| `num_heads` | Number of attention heads | 4-16 |
+| `batch_size` | Batch size | 32-256 |
+| `learning_rate` | Initial learning rate | 1e-4-1e-3 |
+| `epochs` | Number of training epochs | 100-500 |
 
-## 📈 输出说明
+## 📈 Output Description
 
-### 输出文件结构
+### Output File Structure
 
 ```
 project/
 ├── gene_env_moe_model/
-│   ├── trait1_full_moe_model_03_07_1139.pt    # 模型权重
-│   ├── trait1_full_moe_model_03_07_1139.txt    # 模型信息
-│   ├── trait1_full_history.csv                  # 训练历史
-│   └── trait1_full_summary.json                 # 训练摘要
+│   ├── trait1_full_moe_model_03_07_1139.pt    # Model weights
+│   ├── trait1_full_moe_model_03_07_1139.txt    # Model information
+│   ├── trait1_full_history.csv                  # Training history
+│   └── trait1_full_summary.json                 # Training summary (includes test metrics)
 └── moe_analysis/
-    ├── trait1_full_train_moe_weights.csv        # 训练集MoE权重
-    └── trait1_full_val_moe_weights.csv          # 验证集MoE权重
+    ├── trait1_full_train_moe_weights.csv        # Training set MoE weights
+    ├── trait1_full_val_moe_weights.csv          # Validation set MoE weights
+    └── trait1_full_test_moe_weights.csv         # Test set MoE weights (if available)
 ```
 
-### 训练历史CSV格式
+### Training History CSV Format
 
 | epoch | train_loss | val_loss | learning_rate | train_r2 | val_r2 | train_pcc | val_pcc | aux_loss |
 |-------|-----------|----------|---------------|----------|--------|-----------|---------|----------|
 | 1 | 5.2341 | 5.1923 | 0.0003 | 0.1234 | 0.1185 | 0.3512 | 0.3445 | 0.0012 |
 | 2 | 4.8723 | 4.8210 | 0.0003 | 0.1876 | 0.1821 | 0.4332 | 0.4267 | 0.0008 |
 
-### MoE权重CSV格式
+### Training Summary JSON Format
+
+```json
+{
+    "best_epoch": 156,
+    "best_val_loss": 2.3456,
+    "train_r2": 0.7890,
+    "val_r2": 0.6789,
+    "test_r2": 0.6523,
+    "test_pcc": 0.8077,
+    "model_path": "../gene_env_moe_model/trait1_full_moe_model_03_07_1139.pt"
+}
+```
+
+### MoE Weights CSV Format
 
 | sample_index | hybrid_id | env_id | prediction | expert_0_prob | expert_1_prob | ... | selected_expert_0 | gating_weight_0 | ... |
 |--------------|-----------|--------|------------|---------------|---------------|-----|-------------------|-----------------|-----|
 | 0 | Hybrid_1 | ENV_001 | 10.5 | 0.1 | 0.8 | ... | 1 | 0.9 | ... |
 | 1 | Hybrid_2 | ENV_001 | 12.3 | 0.05 | 0.05 | ... | 5 | 0.85 | ... |
 
-## 🔬 模型变体
+## 🔬 Model Variants
 
-本项目提供四种模型变体用于消融实验：
+This project provides four model variants for ablation experiments:
 
-| 模型 | 命令参数 | 说明 |
-|------|----------|------|
-| **完整模型** | `--model full` | 包含所有组件的完整模型 |
-| **无MoE** | `--model no_moe` | 移除MoE层，使用单一专家 |
-| **无效应分离** | `--model no_effect_sep` | 移除独立效应和协同效应的分离机制 |
-| **无Token融合** | `--model no_token_fusion` | 使用简单拼接代替Token化跨模态融合 |
+| Model | Command Parameter | Description |
+|-------|------------------|-------------|
+| **Full Model** | `--model full` | Complete model with all components |
+| **Without MoE** | `--model no_moe` | Model without MoE layer (single expert) |
+| **Without Effect Separation** | `--model no_effect_sep` | Model without independent/cooperative effect separation |
+| **Without Token Fusion** | `--model no_token_fusion` | Uses simple concatenation instead of token-wise cross-modal fusion |
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-欢迎贡献代码！请遵循以下步骤：
+Contributions are welcome! Please follow these steps:
 
-1. Fork本仓库
-2. 创建功能分支 (`git checkout -b feature/your-feature`)
-3. 提交修改 (`git commit -m 'Add some feature'`)
-4. 推送到分支 (`git push origin feature/your-feature`)
-5. 创建Pull Request
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Create a Pull Request
 
-### 代码规范
+### Code Style Guidelines
 
-- 遵循PEP 8编码规范
-- 使用类型提示
-- 添加适当的注释
-- 保持代码简洁清晰
+- Follow PEP 8 coding standards
+- Use type hints
+- Add appropriate comments
+- Keep code clean and concise
 
-## 📄 许可证
+## 📄 License
 
-本项目采用MIT许可证，详见 [LICENSE](LICENSE) 文件。
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-## 📚 参考文献
 
-如果使用本模型，请引用相关文献：
 
-```bibtex
-@article{gene-env-moe,
-    title={Gene-Environment Interaction Prediction with Mixture of Experts},
-    author={Your Name},
-    journal={Journal Name},
-    year={2024}
-}
-```
+## 📧 Contact
 
-## 📧 联系方式
+For questions or suggestions, please contact us via:
 
-如有问题或建议，请通过以下方式联系：
-
-- 提交Issue
-- 发送邮件至：[your-email@example.com]
+- Submit an Issue
+- Email: [sy1302498577@163.com]
 
 ---
 
-**注意**：本模型仅供研究使用，使用前请确保数据使用符合相关法规和伦理要求。
+**Note**: This model is for research purposes only. Please ensure compliance with relevant regulations and ethical requirements before using the data.

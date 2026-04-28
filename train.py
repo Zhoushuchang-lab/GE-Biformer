@@ -237,15 +237,16 @@ def main():
     os.makedirs(moe_analysis_dir, exist_ok=True)
     
     # 使用整合后的表型数据
-    snp_path = os.path.join(data_dir, "012_matrix.tsv")
+    genotype_path = os.path.join(data_dir, "genotype.tsv")
     pheno_path = os.path.join(data_dir, "Phenotypes.csv")
     env_path = os.path.join(data_dir, "Environment_data.csv")
+    test_path = os.path.join(data_dir, "test.csv")
     
     # 创建moe_analysis目录（如果不存在）
     os.makedirs(moe_analysis_dir, exist_ok=True)
     
     print("\n准备训练数据...")
-    dataset_dict = prepare_dataset(snp_path, env_path, pheno_path)
+    dataset_dict = prepare_dataset(genotype_path, env_path, pheno_path, test_path)
     
     # 检查是否有可用的训练数据
     has_data = False
@@ -304,6 +305,13 @@ def main():
         train_loader = DataLoader(train_ds, batch_size=config['batch_size'], shuffle=True)
         val_loader = DataLoader(val_ds, batch_size=config['batch_size'], shuffle=False)
         
+        # 检查是否有测试数据
+        has_test_data = len(dataset_dict[trait]['test']) > 0
+        if has_test_data:
+            test_ds = GeneEnvDataset(dataset_dict[trait]['test'], is_train=True)
+            test_loader = DataLoader(test_ds, batch_size=config['batch_size'], shuffle=False)
+            print(f"测试集样本数: {len(test_ds)}")
+        
         # 创建模型
         model_class = model_class_map[args.model]
         model = model_class(num_snps, num_env_vars, num_traits=1)
@@ -337,6 +345,29 @@ def main():
             'model_path': model_path,
         }
         
+        # 测试集评估
+        if has_test_data:
+            print(f"\n评估{trait_name_map[trait]}测试集...")
+            model.eval()
+            test_predictions = []
+            test_targets = []
+            with torch.no_grad():
+                for batch in test_loader:
+                    snp = batch['snp'].to(device)
+                    env = batch['env'].to(device)
+                    trait_val = batch['trait'].to(device)
+                    output = model(snp, env)
+                    test_predictions.extend(output.cpu().numpy().flatten())
+                    test_targets.extend(trait_val.cpu().numpy().flatten())
+            
+            from sklearn.metrics import r2_score, pearsonr
+            test_r2 = r2_score(test_targets, test_predictions)
+            test_pcc, _ = pearsonr(test_targets, test_predictions)
+            
+            training_summary[key]['test_r2'] = test_r2
+            training_summary[key]['test_pcc'] = test_pcc
+            print(f"测试集 R²: {test_r2:.4f}, PCC: {test_pcc:.4f}")
+        
         summary_path = model_path.rsplit('.', 1)[0] + "_summary.json"
         with open(summary_path, 'w', encoding='utf-8') as f:
             json.dump(training_summary[key], f, ensure_ascii=False, indent=2)
@@ -350,6 +381,12 @@ def main():
             print(f"记录{trait_name_map[trait]}验证集MoE权重...")
             val_weights_file = os.path.join(moe_analysis_dir, f"{model_name}_val_moe_weights.csv")
             record_moe_weights(model, val_loader, device, val_weights_file)
+            
+            # 如果有测试集，也记录测试集的MoE权重
+            if has_test_data:
+                print(f"记录{trait_name_map[trait]}测试集MoE权重...")
+                test_weights_file = os.path.join(moe_analysis_dir, f"{model_name}_test_moe_weights.csv")
+                record_moe_weights(model, test_loader, device, test_weights_file)
     
     print("\n========== 训练摘要 ==========")
     for key, summary in training_summary.items():
