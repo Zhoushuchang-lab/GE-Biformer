@@ -39,11 +39,11 @@
 │       │         │         │                                     │
 │       ▼         │         ▼                                     │
 │  SNP Attention  │  Environment Attention                        │
-│  (独立+协同)     │  (独立+协同)                                  │
-│       │         │          │                                    │
-│       └────┬────┘          │                                    │
-│            │               │                                    │
-│            ▼               ▼                                    │
+│  (Ind+Coop)     │  (Ind+Coop)                                   │
+│       │         │         │                                     │
+│       └────┬────┘         │                                     │
+│            │              │                                     │
+│            ▼              ▼                                     │
 │        Token-wise Cross-Modal Fusion                            │
 │            │                                                    │
 │            ▼                                                    │
