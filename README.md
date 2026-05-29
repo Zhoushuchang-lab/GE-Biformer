@@ -31,8 +31,8 @@
 │       │                                   │                      │
 │       ▼                                   ▼                      │
 │  SNP Attention Module              Env Attention Module          │
-│  ├─ Independent Attention (MLP)    ├─ Independent Attention       │
-│  ├─ Cooperative Attention (MHA)    ├─ Cooperative Attention       │
+│  ├─ Independent Attention (MLP)    ├─ Independent Attention      │
+│  ├─ Cooperative Attention (MHA)    ├─ Cooperative Attention      │
 │  └─ GLU Dynamic Gate               └─ GLU Dynamic Gate           │
 │       │                                   │                      │
 │       ▼                                   ▼                      │
@@ -42,7 +42,7 @@
 │       └───────────────┬───────────────────┘                      │
 │                       ▼                                          │
 │           Token-wise Cross-Modal Attention                       │
-│            (SNP Tokens ⟷ Env Tokens)                             │
+│            (SNP Tokens ⟷ Env Tokens)                            │
 │                       │                                          │
 │                       ▼                                          │
 │           Mixture of Experts (Top-2 of 8)                        │
