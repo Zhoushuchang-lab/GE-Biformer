@@ -1,0 +1,276 @@
+## 完全正确！您已经抓住了问题的核心
+
+您的诊断非常准确：**需要增加熵惩罚，迫使tokenizer产生差异化分配**，类似于MoE中的负载均衡损失。
+
+---
+
+## 一、问题本质
+
+当前状态：
+```
+每个SNP → [0.125, 0.125, 0.125, ...]  # 均匀分布，没有聚类
+```
+
+理想状态：
+```
+每个SNP → [0.90, 0.03, 0.02, 0.01, ...]  # 主要属于一个Token
+```
+
+---
+
+## 二、解决方案：添加熵惩罚损失
+
+在 `model.py` 的 `LearnableClusterTokenizer` 中修改：
+
+### 当前代码
+
+```python
+# model.py - LearnableClusterTokenizer.forward()
+if self.training:
+    assignment = F.gumbel_softmax(
+        similarity, tau=self.temperature, hard=False, dim=-1
+    )
+else:
+    assignment = F.softmax(similarity / self.temperature, dim=-1)
+```
+
+### 修改后的代码
+
+```python
+# model.py - LearnableClusterTokenizer.forward()
+
+# 计算原始分配（用于熵惩罚）
+raw_assignment = F.softmax(similarity / self.temperature, dim=-1)
+
+if self.training:
+    assignment = F.gumbel_softmax(
+        similarity, tau=self.temperature, hard=False, dim=-1
+    )
+else:
+    assignment = raw_assignment
+
+# 存储用于计算熵惩罚
+self.last_raw_assignment = raw_assignment.detach()
+```
+
+### 添加熵惩罚计算函数
+
+```python
+# model.py - LearnableClusterTokenizer
+
+def get_clustering_entropy(self) -> torch.Tensor:
+    """计算聚类熵，惩罚均匀分配"""
+    if self.last_assignment is None:
+        return torch.tensor(0.0, device=self.token_prototypes.device)
+    
+    # 使用raw_assignment而不是硬分配
+    assignment = getattr(self, 'last_raw_assignment', self.last_assignment)
+    
+    # 对每个SNP计算熵：H = -Σ p * log(p)
+    # 熵越小表示分配越集中（好），熵越大表示越均匀（坏）
+    entropy_per_snp = -(assignment * torch.log(assignment + 1e-8)).sum(dim=-1)
+    
+    # 平均熵（我们希望越小越好）
+    mean_entropy = entropy_per_snp.mean()
+    
+    # 归一化到 [0, 1] 范围
+    max_entropy = np.log(assignment.shape[-1])  # log(8) ≈ 2.08
+    normalized_entropy = mean_entropy / max_entropy
+    
+    return normalized_entropy  # 0 = 完全集中, 1 = 完全均匀
+
+
+def get_token_diversity(self) -> torch.Tensor:
+    """计算Token之间的多样性，防止所有Token学到相同的东西"""
+    # 计算每个Token的平均分配权重（在所有SNP上）
+    if self.last_assignment is None:
+        return torch.tensor(0.0, device=self.token_prototypes.device)
+    
+    assignment = getattr(self, 'last_raw_assignment', self.last_assignment)
+    # token_usage shape: [num_tokens]
+    token_usage = assignment.mean(dim=1).mean(dim=0)  # 平均每个SNP对每个Token的权重
+    
+    # 多样性损失：鼓励token使用均匀分布（防止某些Token从未被使用）
+    # 使用KL散度或标准差
+    target_usage = torch.ones_like(token_usage) / len(token_usage)
+    diversity_loss = F.kl_div(
+        token_usage.log(), target_usage, reduction='batchmean'
+    )
+    
+    return diversity_loss
+```
+
+---
+
+## 三、在训练中添加熵惩罚
+
+修改 `train.py` 中的训练循环：
+
+```python
+# train.py - train_fold() 函数中
+
+# 现有代码
+clustering_info = model.get_clustering_info()
+clustering_loss = 0.0
+if clustering_info is not None:
+    entropy = clustering_info.get('entropy', torch.tensor(0.0))
+    diversity = clustering_info.get('diversity', torch.tensor(0.0))
+    
+    # 我们希望熵小（集中），多样性适中
+    # 熵损失：惩罚均匀分布（越小越好）
+    entropy_loss = entropy  # 熵本身是归一化的，0=好，1=坏
+    
+    # 多样性损失：惩罚token使用不均
+    diversity_loss = diversity
+    
+    # 总聚类损失
+    clustering_loss = (
+        config.get('clustering_entropy_weight', 0.05) * entropy_loss +
+        config.get('clustering_diversity_weight', 0.01) * diversity_loss
+    )
+
+loss = main_loss + config['aux_loss_coef'] * aux_loss + clustering_loss
+```
+
+---
+
+## 四、修改配置文件 `config.py`
+
+```python
+config = {
+    # ... 现有配置 ...
+    
+    'num_snp_tokens': 8,
+    'num_env_tokens': 4,
+    'clustering_temperature': 0.2,  # 从0.5降低到0.2，使分配更集中
+    'clustering_entropy_weight': 0.1,  # 从0.01增加到0.1，增强惩罚
+    'clustering_diversity_weight': 0.05,  # 新增，鼓励token使用均匀
+    
+    # ... 其他配置 ...
+}
+```
+
+---
+
+## 五、关键参数调整建议
+
+| 参数 | 原值 | 建议值 | 说明 |
+|------|------|--------|------|
+| `clustering_temperature` | 0.5 | **0.1-0.2** | 越低分配越硬（接近one-hot） |
+| `clustering_entropy_weight` | 0.01 | **0.05-0.1** | 越高越惩罚均匀分布 |
+| `clustering_diversity_weight` | 无 | **0.01-0.05** | 新增，防止token坍塌 |
+
+---
+
+## 六、完整修改后的 `model.py` 片段
+
+```python
+class LearnableClusterTokenizer(nn.Module):
+    def __init__(self, input_dim: int, num_tokens: int, fusion_dim: int,
+                 temperature: float = 0.5):
+        super().__init__()
+        self.num_tokens = num_tokens
+        self.input_dim = input_dim
+        self.temperature = temperature
+
+        self.token_prototypes = nn.Parameter(
+            torch.randn(num_tokens, input_dim) * 0.1
+        )
+
+        # ... 其他初始化 ...
+
+    def forward(self, features: torch.Tensor, hard: bool = False) -> torch.Tensor:
+        B, D = features.shape
+        assert D == self.input_dim
+
+        similarity = torch.einsum('bd,td->bdt', features, self.token_prototypes)
+
+        # 计算原始softmax分配（用于熵计算）
+        raw_assignment = F.softmax(similarity / self.temperature, dim=-1)
+        
+        if hard:
+            assignment = F.softmax(similarity / self.temperature, dim=-1)
+            hard_assignment = torch.zeros_like(assignment)
+            hard_assignment.scatter_(-1, assignment.argmax(dim=-1, keepdim=True), 1.0)
+            assignment = hard_assignment
+        elif self.training:
+            assignment = F.gumbel_softmax(
+                similarity, tau=self.temperature, hard=False, dim=-1
+            )
+        else:
+            assignment = raw_assignment
+
+        # 存储用于熵计算（使用raw_assignment，因为gumbel有噪声）
+        self.last_raw_assignment = raw_assignment.detach()
+        self.last_assignment = assignment.detach()
+
+        # ... 继续原有代码 ...
+        return tokens
+
+    def get_clustering_entropy(self) -> torch.Tensor:
+        """熵越小表示聚类越集中"""
+        if not hasattr(self, 'last_raw_assignment') or self.last_raw_assignment is None:
+            return torch.tensor(0.0, device=self.token_prototypes.device)
+        
+        assignment = self.last_raw_assignment
+        # 计算每个SNP的熵
+        entropy_per_snp = -(assignment * torch.log(assignment + 1e-8)).sum(dim=-1)
+        mean_entropy = entropy_per_snp.mean()
+        
+        # 归一化到[0,1]
+        max_entropy = np.log(assignment.shape[-1])
+        normalized_entropy = mean_entropy / max_entropy
+        
+        return normalized_entropy
+
+    def get_token_diversity(self) -> torch.Tensor:
+        """鼓励token使用均匀"""
+        if not hasattr(self, 'last_raw_assignment') or self.last_raw_assignment is None:
+            return torch.tensor(0.0, device=self.token_prototypes.device)
+        
+        assignment = self.last_raw_assignment
+        # 每个token的平均使用率
+        token_usage = assignment.mean(dim=1).mean(dim=0)  # [num_tokens]
+        
+        # 均匀分布目标
+        target = torch.ones_like(token_usage) / len(token_usage)
+        
+        # KL散度
+        diversity_loss = F.kl_div(
+            (token_usage + 1e-8).log(), 
+            target, 
+            reduction='batchmean'
+        )
+        
+        return diversity_loss
+```
+
+---
+
+## 七、重新训练命令
+
+```bash
+cd /root/fsas/algorithm
+
+# 修改配置后重新训练
+nohup python -u train.py --traits 1-6 > train_v2.log 2>&1 &
+
+# 监控
+tail -f train_v2.log
+```
+
+---
+
+## 八、预期改善
+
+修改后，`.npy` 文件中的数据应该变为：
+
+```python
+# 第一行（第1个SNP）
+[0.85, 0.05, 0.03, 0.02, 0.02, 0.01, 0.01, 0.01]  # 主要属于Token1
+
+# 每行最大值平均应该从 0.13 提升到 0.6-0.9
+# 排列检验应该显示 8/8 Token显著
+```
+
+这样就能回答审稿人的问题了！

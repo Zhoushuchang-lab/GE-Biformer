@@ -1,0 +1,91 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Model weights (large files)
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Large data arrays
+*.npy
+*.npz
+
+# Data files (large, regenerate from source)
+data/Phenotypes.csv
+data/genotype.tsv
+data/Environment_data.csv
+data/012_matrix.tsv
+data/batch_token_validation.zip
+data/other_data/
+
+# Generated experiment splits (regeneratable)
+data/unseen_environment_data*/
+data/unseen_genotype_data*/
+data/unseen_both_data*/
+
+# Results (regeneratable)
+results/
+results_comparison/
+gene_env_moe_model/
+
+# Logs
+*.log
+
+# Old archived code
+GE/
+
+# Temp files
+*.tmp
+*.bak
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.rar
+
+# Office temp files
+~$*.xlsx
+~$*.docx
+
+# Personal documents
+审稿人回复/
+Submited_Manuscript.docx
+algorithm.zip
+
+# Trae AI specs (local)
+.trae/
+
+# Misc
+cv_results/
