@@ -56,7 +56,7 @@ GEBiformer addresses the challenge of predicting complex traits by integrating g
 │       │                                   │                      │
 │       ▼                                   ▼                      │
 │  Learnable Cluster Tokenizer       Learnable Cluster Tokenizer   │
-│  (S → 8 SNP Tokens)                (E → 4 Env Tokens)            │
+│  (S → 32 SNP Tokens)                (E → 16 Env Tokens)            │
 │       │                                   │                      │
 │       └───────────────┬───────────────────┘                      │
 │                       ▼                                          │
