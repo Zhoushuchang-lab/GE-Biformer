@@ -233,8 +233,8 @@ All hyperparameters are configured in `algorithm/config.py`:
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `num_snp_tokens` | 8 | Number of SNP cluster tokens |
-| `num_env_tokens` | 4 | Number of environment cluster tokens |
+| `num_snp_tokens` | 32 | Number of SNP cluster tokens |
+| `num_env_tokens` | 16 | Number of environment cluster tokens |
 | `num_experts` | 8 | Number of MoE experts |
 | `top_k` | 2 | Number of experts selected per sample |
 | `num_heads` | 8 | Number of attention heads |
