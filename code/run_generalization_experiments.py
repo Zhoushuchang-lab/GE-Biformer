@@ -29,7 +29,7 @@ TRAIT_COL_MAP = {
 EXP_DIR_MAP = {
     'unseen_env': ['unseen_environment_data%d' % i for i in range(1, 6)],
     'unseen_geno': ['unseen_genotype_data%d' % i for i in range(1, 6)],
-    'unseen_both': ['unseen_both_data%d' % i for i in range(1, 4)],
+    'unseen_both': ['unseen_both_data%d' % i for i in range(1, 6)],
 }
 
 

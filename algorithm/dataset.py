@@ -111,8 +111,7 @@ def prepare_dataset(genotype_path, env_path, pheno_path, test_path=None):
         'trait3': 'Pollen_DAP_days',
         'trait4': 'Silk_DAP_days',
         'trait5': 'Plant_Height_cm',
-        'trait6': 'Ear_Height_cm',
-        'trait7': 'Twt_kg_m3'
+        'trait6': 'Ear_Height_cm'
     }
     
     # 加载测试集
@@ -124,7 +123,7 @@ def prepare_dataset(genotype_path, env_path, pheno_path, test_path=None):
             if col in test_pheno_data.columns:
                 test_pheno_data[col] = pd.to_numeric(test_pheno_data[col], errors='coerce')
         
-        for trait_key in ['trait1', 'trait2', 'trait3', 'trait4', 'trait5', 'trait6', 'trait7']:
+        for trait_key in ['trait1', 'trait2', 'trait3', 'trait4', 'trait5', 'trait6']:
             test_data_dict[trait_key] = []
         
         for _, row in test_pheno_data.iterrows():
@@ -154,7 +153,7 @@ def prepare_dataset(genotype_path, env_path, pheno_path, test_path=None):
     # 初始化性状数据列表
     trait_data = {
         'trait1': [], 'trait2': [], 'trait3': [], 'trait4': [], 
-        'trait5': [], 'trait6': [], 'trait7': []
+        'trait5': [], 'trait6': []
     }
     
     for _, row in pheno_data.iterrows():
@@ -192,8 +191,7 @@ def prepare_dataset(genotype_path, env_path, pheno_path, test_path=None):
         'trait3': {'train': [], 'val': [], 'test': []},
         'trait4': {'train': [], 'val': [], 'test': []},
         'trait5': {'train': [], 'val': [], 'test': []},
-        'trait6': {'train': [], 'val': [], 'test': []},
-        'trait7': {'train': [], 'val': [], 'test': []}
+        'trait6': {'train': [], 'val': [], 'test': []}
     }
     
     # 对每个性状进行train_val_split（80-20）

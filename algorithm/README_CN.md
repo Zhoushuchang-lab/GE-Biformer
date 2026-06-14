@@ -76,33 +76,58 @@
 - PyTorch >= 2.0
 - CUDA >= 11.8 (推荐使用GPU训练)
 
-### 使用conda安装
+### 使用conda安装（推荐）
 
 ```bash
 # 克隆仓库
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/Zhoushuchang-lab/GE-Biformer.git
+cd GE-Biformer
 
 # 创建并激活环境
-conda env create -f code/environment.yml
-conda activate gene-env-moe
+conda env create -f environment.yml
+conda activate gebiformer
+```
 
-# 进入代码目录
-cd code
+### 手动创建环境
+
+如果上述命令失败，可以手动创建环境：
+
+```bash
+# 创建环境
+conda create -n gebiformer python=3.11 -y
+conda activate gebiformer
+
+# 安装PyTorch（CUDA 12.6版本）
+pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
+
+# 安装其他依赖
+pip install numpy pandas scikit-learn scipy matplotlib seaborn tqdm einops opt_einsum safetensors pyyaml dill cloudpickle filelock
 ```
 
 ### 使用pip安装
 
 ```bash
-# 创建虚拟环境
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # 或
 venv\Scripts\activate    # Windows
 
 # 安装依赖
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install pandas numpy scikit-learn matplotlib tqdm
+pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu121
+pip install pandas numpy scikit-learn matplotlib seaborn tqdm torchmetrics
+```
+
+### 验证安装
+
+```bash
+python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA version:', torch.version.cuda)"
+```
+
+期望输出：
+```text
+PyTorch: 2.6.0
+CUDA available: True
+CUDA version: 12.6
 ```
 
 ## 📊 数据准备

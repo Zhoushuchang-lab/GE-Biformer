@@ -69,7 +69,7 @@ def create_unseen_geno_splits(df, n_splits=5, test_pct=0.10, random_state=42):
                            check_env_overlap=False, check_geno_overlap=True)
 
 
-def create_unseen_both_splits(df, n_splits=3, final_test_ratio=0.10, random_state=42):
+def create_unseen_both_splits(df, n_splits=5, final_test_ratio=0.10, random_state=42):
     rng = np.random.default_rng(random_state)
 
     a = final_test_ratio

@@ -437,8 +437,7 @@ def main():
         'trait3': 'Pollen_DAP_days',
         'trait4': 'Silk_DAP_days',
         'trait5': 'Plant_Height_cm',
-        'trait6': 'Ear_Height_cm',
-        'trait7': 'Twt_kg_m3'
+        'trait6': 'Ear_Height_cm'
     }
 
     # Training loop
