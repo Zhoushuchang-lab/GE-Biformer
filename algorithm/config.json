@@ -22,8 +22,8 @@
     "top_k": 2,
     "aux_loss_coef": 0.01,
     "expert_dropout": 0.2,
-    "num_snp_tokens": 8,
-    "num_env_tokens": 4,
+    "num_snp_tokens": 32,
+    "num_env_tokens": 16,
     "early_patience": 30,
     "early_min_delta": 0.0001
 }
