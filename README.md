@@ -43,16 +43,16 @@ GEBiformer addresses the challenge of predicting complex traits by integrating g
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                         GEBiformer                             │
+│                         GEBiformer                               │
 ├──────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  Genotype (N × S)                  Environment (N × E)         │
+│                                                                  │
+│  Genotype (N × S)                  Environment (N × E)           │
 │       │                                   │                      │
 │       ▼                                   ▼                      │
 │  SNP Attention Module              Env Attention Module          │
-│  ├─ Independent Attention (MLP)    ├─ Independent Attention    │
-│  ├─ Cooperative Attention (MHA)    ├─ Cooperative Attention    │
-│  └─ GLU Dynamic Gate               └─ GLU Dynamic Gate         │
+│  ├─ Independent Attention (MLP)    ├─ Independent Attention      │
+│  ├─ Cooperative Attention (MHA)    ├─ Cooperative Attention      │
+│  └─ GLU Dynamic Gate               └─ GLU Dynamic Gate           │
 │       │                                   │                      │
 │       ▼                                   ▼                      │
 │  Learnable Cluster Tokenizer       Learnable Cluster Tokenizer   │
@@ -71,7 +71,7 @@ GEBiformer addresses the challenge of predicting complex traits by integrating g
 │                       │                                          │
 │                       ▼                                          │
 │                Phenotype Prediction                              │
-│                                                                │
+│                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
