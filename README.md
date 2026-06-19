@@ -97,8 +97,7 @@ GEBiformer/
 │   ├── model.py            # Model definitions
 │   ├── dataset.py          # Data loading & preprocessing
 │   ├── train.py            # 5-fold CV training script
-│   ├── utils.py            # Utilities (EarlyStopping, metrics)
-│   └── requirements.txt    # Dependencies
+│   └── utils.py            # Utilities (EarlyStopping, metrics)
 ├── code/                   # Experiment scripts
 │   ├── create_generalization_splits.py    # Generate CV2/CV3/CV4 splits
 │   └── run_generalization_experiments.py  # Run generalization experiments
@@ -122,7 +121,7 @@ conda create -n gebiformer python=3.12
 conda activate gebiformer
 
 pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0
-pip install -r algorithm/requirements.txt
+pip install -r requirements.txt
 ```
 
 ---
